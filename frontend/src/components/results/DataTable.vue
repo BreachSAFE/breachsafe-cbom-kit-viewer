@@ -32,7 +32,19 @@
       :rows="5"
     >
       <template slot="actions">
-        <cv-button :icon="downloadIcon" :disabled="true">
+        <cv-button
+          class="cbom-export-button cbom-screen-only"
+          :icon="Printer24"
+          :disabled="true"
+          kind="secondary"
+        >
+          Save as PDF
+        </cv-button>
+        <cv-button
+          class="cbom-export-button cbom-screen-only"
+          :icon="downloadIcon"
+          :disabled="true"
+        >
           Download CBOM
         </cv-button>
       </template></cv-data-table-skeleton
@@ -76,12 +88,23 @@
           </div>
         </div>
         <cv-icon-button
+          class="cbom-screen-only"
           kind="ghost"
           @click="showPrompt(false)"
           :disabled="model.scanning.isScanning"
           :icon="SettingsAdjust24"
         ></cv-icon-button>
         <cv-button
+          class="cbom-export-button cbom-screen-only"
+          kind="secondary"
+          @click="printCBOM"
+          :disabled="model.scanning.isScanning"
+          :icon="Printer24"
+        >
+          Save as PDF
+        </cv-button>
+        <cv-button
+          class="cbom-export-button cbom-screen-only"
           @click="downloadCBOM"
           :disabled="model.scanning.isScanning"
           :icon="downloadIcon"
@@ -202,6 +225,7 @@ import {
 } from "@/helpers";
 import {
   Maximize24,
+  Printer24,
   SettingsAdjust24,
   WatsonHealthImageAvailabilityUnavailable24,
 } from "@carbon/icons-vue";
@@ -226,6 +250,7 @@ export default {
       Maximize24,
       currentAssetModal: null,
       currentPagination: null,
+      printMode: false,
       reportMode: new URLSearchParams(window.location.search).get('cbom') != null,
       openInCodeOnConfirm: false, // If true, the user has clicked on the button to get the prompt. If false, the prompt was shown after the user tried to openInCode.
       columns: ["Cryptographic asset", "Type", "Primitive", "Location"],
@@ -234,6 +259,7 @@ export default {
         <path d="M7.506 11.03l4.137-4.376.727.687-5.363 5.672-5.367-5.67.726-.687 4.14 4.374V0h1v11.03z"></path>
         <path d="M13 15v-2h1v2a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1v-2h1v2h12z"></path>
         </svg>'`,
+      Printer24,
       SettingsAdjust24,
     };
   },
@@ -250,7 +276,7 @@ export default {
       return getDetections();
     },
     paginatedDetections() {
-      if (this.reportMode) {
+      if (this.reportMode || this.printMode) {
         return this.detections;
       }
       if (this.currentPagination == null) {
@@ -359,6 +385,15 @@ export default {
       document.body.appendChild(element);
       element.click();
       document.body.removeChild(element);
+    },
+    printCBOM: async function () {
+      this.printMode = true;
+      try {
+        await this.$nextTick();
+        window.print();
+      } finally {
+        this.printMode = false;
+      }
     },
     showDetectionDetailsFor: function (value) {
       this.currentAssetModal = this.paginatedDetections[value.index];

@@ -15,6 +15,7 @@
         {{ getTitle }}
       </span>
       <cv-header-global-action
+        class="cbom-screen-only"
         @click="updateTheme"
         :label="tipText"
         tipPosition="bottom"
