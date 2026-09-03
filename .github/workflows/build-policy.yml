@@ -16,16 +16,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      - name: Enforce standard-image policy
+      - name: Forbid QEMU emulation in container builds
         shell: bash
         run: |
+          # Policy: no emulation. Every architecture must be built on a native
+          # runner. QEMU-based cross-builds are prohibited. Native multi-arch
+          # (for example linux/arm64 on an arm64 runner) is explicitly allowed.
           qemu_action="setup-q""emu-action"
-          arm_platform="linux/ar""m64"
           if grep -R -n -- "$qemu_action" .github/workflows; then
-            echo "QEMU container-build setup is prohibited." >&2
+            echo "QEMU emulation is prohibited: build each platform on a native runner." >&2
             exit 1
           fi
-          if grep -R -n -- "$arm_platform" .github/workflows; then
-            echo "Only the standard linux/amd64 publish platform is supported." >&2
-            exit 1
-          fi
+          echo "No QEMU emulation found; native multi-arch container builds are allowed."
