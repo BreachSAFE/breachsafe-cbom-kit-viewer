@@ -28,7 +28,7 @@ on:
 env:
   REGISTRY: "ghcr.io"
   ORG: "breachsafe"
-  IMAGE_NAME: "breachsafe-cbom-kit-viewer"
+  IMAGE_NAME: "qureddy-cbom-viewer"
 
 jobs:
   build:
