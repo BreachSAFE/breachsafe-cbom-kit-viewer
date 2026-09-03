@@ -6,3 +6,4 @@ export * from "@/helpers/compliance.js";
 export * from "@/helpers/compliance-local.js";
 export * from "@/helpers/general.js";
 export * from "@/helpers/cbom.js";
+export * from "@/helpers/cbom-artifact.js";

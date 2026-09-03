@@ -106,7 +106,7 @@
         <cv-button
           class="cbom-export-button cbom-screen-only"
           @click="downloadCBOM"
-          :disabled="model.scanning.isScanning"
+          :disabled="model.scanning.isScanning || model.cbomArtifact == null"
           :icon="downloadIcon"
         >
           Download CBOM
@@ -373,18 +373,21 @@ export default {
       this.currentPagination = content;
     },
     downloadCBOM: function () {
-      let data = JSON.stringify(model.cbom, null, 2);
-      let filename = "cbom.json";
+      if (model.cbomArtifact == null) {
+        return;
+      }
+      const blob = new Blob([model.cbomArtifact.bytes], {
+        type: "application/json",
+      });
+      const href = URL.createObjectURL(blob);
       let element = document.createElement("a");
-      element.setAttribute(
-        "href",
-        "data:application/json;charset=utf-8," + encodeURIComponent(data)
-      );
-      element.setAttribute("download", filename);
+      element.setAttribute("href", href);
+      element.setAttribute("download", model.cbomArtifact.filename);
       element.style.display = "none";
       document.body.appendChild(element);
       element.click();
       document.body.removeChild(element);
+      URL.revokeObjectURL(href);
     },
     printCBOM: async function () {
       this.printMode = true;

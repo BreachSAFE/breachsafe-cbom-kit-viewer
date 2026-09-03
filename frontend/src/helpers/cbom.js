@@ -1,4 +1,5 @@
 import {ErrorStatus, model} from "@/model.js";
+import {createCbomArtifact, parseCbomArtifact} from "@/helpers/cbom-artifact.js";
 
 // This function partially checks the CBOM properties that are necessary for the frontend, but does not formally verifies the validity of the CBOM format
 function checkCbomValidity(cbom) {
@@ -285,7 +286,9 @@ export function setCbom(cbom) {
 
 export function showResultFromApi(cbomApi) {
   let cbom = getCbomFromScan(cbomApi);
+  const artifact = createCbomArtifact(cbom);
   setCbom(cbom);
+  model.cbomArtifact = artifact;
   setDependenciesMap(cbom)
   model.codeOrigin.projectIdentifier = cbomApi.projectIdentifier
   model.codeOrigin.gitUrl = cbomApi.gitUrl;
@@ -293,11 +296,22 @@ export function showResultFromApi(cbomApi) {
   model.showResults = true;
 }
 
-export function showResultFromUpload(cbom, name) {
+export function showResultFromUpload(cbom, name, sourceBytes) {
+  const artifact = createCbomArtifact(
+    cbom,
+    name,
+    sourceBytes
+  );
   setCbom(cbom);
+  model.cbomArtifact = artifact;
   setDependenciesMap(cbom)
   model.codeOrigin.uploadedFileName = name;
   model.showResults = true;
+}
+
+export function showResultFromBytes(sourceBytes, filename) {
+  const {artifact, cbom} = parseCbomArtifact(sourceBytes, filename);
+  showResultFromUpload(cbom, artifact.filename, artifact.bytes);
 }
 
 // Takes a Scan object as returned by the API and returns the CBOM as an Object.

@@ -5,7 +5,59 @@ import CarbonComponentsVue from "@carbon/vue/src/index";
 import ChartsVue from "@carbon/charts-vue";
 // eslint-disable-next-line no-unused-vars
 import { model } from "@/model.js";
-import { showResultFromUpload } from "@/helpers";
+import {
+  MAX_CBOM_ARTIFACT_BYTES,
+  showResultFromBytes,
+  validateCbomFilename,
+} from "@/helpers";
+
+const EMBEDDED_CBOM_MESSAGE = "breachsafe.cbom.load.v1";
+let embeddedLoadSequence = 0;
+
+function decodeBase64(data) {
+  if (
+    typeof data !== "string" ||
+    data.length === 0 ||
+    data.length > Math.ceil(MAX_CBOM_ARTIFACT_BYTES / 3) * 4 ||
+    data.length % 4 !== 0 ||
+    !/^[A-Za-z0-9+/]*={0,2}$/.test(data)
+  ) {
+    throw new Error("Invalid CBOM artifact base64 data");
+  }
+  const decoded = atob(data);
+  return Uint8Array.from(decoded, (character) => character.charCodeAt(0));
+}
+
+async function loadEmbeddedCbom(message, sequence) {
+  const artifact = message && message.artifact;
+  if (
+    !artifact ||
+    artifact.mediaType !== "application/json" ||
+    artifact.encoding !== "base64" ||
+    !Number.isSafeInteger(artifact.byteLength) ||
+    artifact.byteLength <= 0 ||
+    artifact.byteLength > MAX_CBOM_ARTIFACT_BYTES ||
+    typeof artifact.sha256 !== "string" ||
+    !/^[a-f0-9]{64}$/.test(artifact.sha256)
+  ) {
+    throw new Error("Invalid CBOM artifact metadata");
+  }
+  const filename = validateCbomFilename(artifact.filename);
+  const bytes = decodeBase64(artifact.data);
+  if (bytes.byteLength !== artifact.byteLength) {
+    throw new Error("CBOM artifact length mismatch");
+  }
+  const digest = Array.from(
+    new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)),
+    (byte) => byte.toString(16).padStart(2, "0")
+  ).join("");
+  if (digest !== artifact.sha256) {
+    throw new Error("CBOM artifact digest mismatch");
+  }
+  if (sequence === embeddedLoadSequence) {
+    showResultFromBytes(bytes, filename);
+  }
+}
 
 Vue.use(CarbonComponentsVue);
 Vue.use(ChartsVue);
@@ -15,27 +67,27 @@ Vue.config.silent = true; // Removes ALL Vue warnings
 new Vue({
   render: (h) => h(App),
   created() {
-    // BQP: accept a CBOM pushed in from the host app (e.g. QuReddy Crypto Scan) and
-    // render it exactly like an upload, so a scan auto-populates this viewer.
     window.addEventListener("message", (e) => {
-      if (e.source !== window.parent) return;   // only the embedding host may push a CBOM
+      if (e.source !== window.parent || e.origin !== window.location.origin) return;
       const d = e && e.data;
-      if (d && d.type === "bqp-load-cbom" && d.cbom && d.cbom.components) {
-        try {
-          showResultFromUpload(d.cbom, d.name || "crypto-scan");
-        } catch (err) {
-          console.error("bqp-load-cbom failed", err);
-        }
+      if (d && d.type === EMBEDDED_CBOM_MESSAGE) {
+        const sequence = ++embeddedLoadSequence;
+        model.startAgain();
+        loadEmbeddedCbom(d, sequence).catch((error) => {
+          console.error("Embedded CBOM load failed", error);
+        });
       }
     });
-    // BQP: load a CBOM from ?cbom=<same-origin-url> so a headless browser can print it.
     try {
       const _cbomRaw = new URLSearchParams(window.location.search).get('cbom');
       if (_cbomRaw && !_cbomRaw.includes('\\')) {
         const _u = new URL(_cbomRaw, location.origin);
         if (_u.origin === location.origin) {
-          fetch(_u.href).then((r) => r.json()).then((cbom) => {
-            if (cbom && cbom.components) showResultFromUpload(cbom, 'report');
+          fetch(_u.href).then((response) => {
+            if (!response.ok) throw new Error(`CBOM URL returned ${response.status}`);
+            return response.arrayBuffer();
+          }).then((bytes) => {
+            showResultFromBytes(bytes, 'report.cdx.json');
           }).catch((e) => console.error('cbom url load failed', e));
         }
       }
