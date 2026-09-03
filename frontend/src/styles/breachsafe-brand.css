@@ -17,6 +17,7 @@
 /* primary buttons → orange */
 .bx--btn--primary { background-color:#f97316 !important; border-color:#f97316 !important; }
 .bx--btn--primary:hover { background-color:#ea580c !important; }
+.cbom-export-button { width: 11.75rem; }
 a, .bx--link { color:#f97316 !important; }
 /* grey surfaces */
 .bx--tile, .cv-tile, .bx--structured-list, .bx--data-table { background:#1f2937 !important; }
@@ -25,3 +26,17 @@ a, .bx--link { color:#f97316 !important; }
 /* default the embed to dark so it matches the host app */
 body, #app, .cds--white { background:#0b0f14 !important; color:#f4f4f4 !important; }
 .bx--tile, .cv-tile { background:#1f2937 !important; color:#f4f4f4 !important; }
+
+@media print {
+  @page { size: landscape; margin: 10mm; }
+  body, #app, .make-the-carbon-theme-go-dark, .make-the-carbon-theme-go-white {
+    background: #fff !important;
+    color: #161616 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .cbom-screen-only, .bx--pagination { display: none !important; }
+  .main { max-width: none !important; }
+  .bx--tile svg text { fill: #f4f4f4 !important; }
+  .bx--data-table tr { break-inside: avoid; }
+}

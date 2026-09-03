@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="first-line">
-      <ReturnButton class="return-button" />
+      <ReturnButton class="return-button cbom-screen-only" />
     </div>
     <ResultTitle class="result-title" />
     <DataTable class="data-table" />
