@@ -18,6 +18,7 @@ new Vue({
     // BQP: accept a CBOM pushed in from the host app (e.g. QuReddy Crypto Scan) and
     // render it exactly like an upload, so a scan auto-populates this viewer.
     window.addEventListener("message", (e) => {
+      if (e.source !== window.parent) return;   // only the embedding host may push a CBOM
       const d = e && e.data;
       if (d && d.type === "bqp-load-cbom" && d.cbom && d.cbom.components) {
         try {
