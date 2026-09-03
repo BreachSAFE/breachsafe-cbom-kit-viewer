@@ -1,6 +1,6 @@
 <template>
   <div style="display: flex; align-items: flex-start">
-    <div style="width: 20%; margin-inline: auto">
+    <div v-if="!isInventoryMode" style="width: 20%; margin-inline: auto">
       <!-- <h5 style="text-align: center; padding-bottom: 10px;">Proportion of Quantum Safe cryptographic assets</h5> -->
       <cv-loading
         v-if="isLoadingCompliance"
@@ -105,6 +105,7 @@ import {
   hasValidComplianceResults,
   isLoadingCompliance,
   isUsingLocalComplianceService,
+  isInventoryMode,
 } from "@/helpers";
 
 export default {
@@ -118,6 +119,7 @@ export default {
     getDetections,
   },
   computed: {
+    isInventoryMode,
     isLoadingCompliance,
     hasValidComplianceResults,
     isUsingLocalComplianceService,

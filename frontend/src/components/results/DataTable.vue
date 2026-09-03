@@ -97,7 +97,7 @@
         >
           <cv-data-table-cell>
             <div style="display: flex; align-items: center">
-              <div style="padding-right: 6px; margin-bottom: -2px;">
+              <div v-if="!isInventoryMode" style="padding-right: 6px; margin-bottom: -2px;">
                 <cv-inline-loading
                   v-if="isLoadingCompliance"
                   state="loading"
@@ -197,6 +197,7 @@ import {
   isViewerOnly,
   isLoadingCompliance,
   getComplianceDescription,
+  isInventoryMode,
   resolvePath
 } from "@/helpers";
 import {
@@ -237,6 +238,7 @@ export default {
     };
   },
   computed: {
+    isInventoryMode,
     isViewerOnly,
     isLoadingCompliance,
     hasValidComplianceResults,
@@ -406,11 +408,16 @@ export default {
           let itemA, itemB;
           switch (sortBy.index) {
             case "0":
-              // Sort by compliance first, then alphabetically
-              itemA = getComplianceLevel(a).toString()
-              itemB = getComplianceLevel(b).toString()
-              itemA += a["name"];
-              itemB += b["name"];
+              if (this.isInventoryMode) {
+                itemA = a["name"];
+                itemB = b["name"];
+              } else {
+                // Sort by compliance first, then alphabetically
+                itemA = getComplianceLevel(a).toString()
+                itemB = getComplianceLevel(b).toString()
+                itemA += a["name"];
+                itemB += b["name"];
+              }
               break;
             case "1":
               itemA = getTermFullName(this.type(a)) ? getTermFullName(this.type(a)) : this.type(a)

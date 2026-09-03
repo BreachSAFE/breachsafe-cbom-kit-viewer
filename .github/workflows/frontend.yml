@@ -8,6 +8,10 @@
 
 name: Build Frontend
 
+concurrency:
+  group: cbom-viewer-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
   packages: write
@@ -23,8 +27,8 @@ on:
 
 env:
   REGISTRY: "ghcr.io"
-  ORG: "cbomkit"
-  IMAGE_NAME: "cbomkit-frontend"
+  ORG: "breachsafe"
+  IMAGE_NAME: "breachsafe-cbom-kit-viewer"
 
 jobs:
   build:
@@ -81,17 +85,27 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: "./frontend"
-          file: "./frontend/docker/Dockerfile"
+          file: "./frontend/Dockerfile.viewer"
           push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Build and push to all platforms
+        id: publish
         if: github.event_name != 'pull_request'
         uses: docker/build-push-action@v6
         with:
           context: "./frontend"
-          file: "./frontend/docker/Dockerfile"
+          file: "./frontend/Dockerfile.viewer"
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
+          provenance: mode=max
+          sbom: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Inspect published digest
+        if: github.event_name != 'pull_request'
+        run: |
+          test -n "${{ steps.publish.outputs.digest }}"
+          docker buildx imagetools inspect \
+            "${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.IMAGE_NAME }}@${{ steps.publish.outputs.digest }}"
