@@ -32,6 +32,7 @@ env:
 
 jobs:
   build:
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: "./frontend"
@@ -49,6 +50,26 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
         run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+      - name: Browser regression
+        env:
+          CBOM_VIEWER_BASE_URL: http://127.0.0.1:8001
+          VUE_APP_VIEWER_ONLY: "true"
+        run: |
+          npm run serve -- --host 127.0.0.1 >"${RUNNER_TEMP}/cbom-viewer.log" 2>&1 &
+          viewer_pid=$!
+          trap 'kill "${viewer_pid}"' EXIT
+          for _ in {1..60}; do
+            if curl -fsS "${CBOM_VIEWER_BASE_URL}" >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl -fsS "${CBOM_VIEWER_BASE_URL}" >/dev/null
+          npx playwright test tests/cbom-print.spec.js --reporter=line
       - name: Build
         run: npm run build --if-present
 
