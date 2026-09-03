@@ -2,6 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Contents
+
+1. [What this is](#what-this-is)
+2. [Build prerequisite](#build-prerequisite)
+3. [Commands](#commands)
+4. [Formatting is enforced at build time](#formatting-is-enforced-at-build-time)
+5. [Release and integration policy](#release-and-integration-policy)
+6. [Architecture](#architecture)
+   1. [Scan flow](#scan-flow-the-core-of-the-system)
+   2. [Persistence](#persistence-write-model-vs-read-model)
+   3. [Compliance](#compliance)
+   4. [API surface](#api-surface)
+7. [Configuration](#configuration)
+8. [Conventions worth matching](#conventions-worth-matching)
+
 ## What this is
 
 CBOMkit generates, stores, views and compliance-checks **CBOMs** (Cryptography Bills of Materials, CycloneDX). Two deployables live in one repo:
@@ -50,6 +65,17 @@ make coeus         # frontend only (viewer)
 ## Formatting is enforced at build time
 
 The spotless plugin binds `apply` (not `check`) to the `validate` phase, and checkstyle binds `check` there too. Any `./mvnw` invocation will silently reformat your Java sources (google-java-format, **AOSP style**, 4-space indent) and inject the Apache/PQCA license header. New `.java` files without the header are fixed automatically; don't hand-write it.
+
+## Release and integration policy
+
+- A successful release must publish `ghcr.io/breachsafe/qureddy-cbom-viewer:latest` and the
+  matching semantic-version tags.
+- QuReddy App consumes the first-party viewer through `:latest` and rebuilds with pull enabled.
+- Do not replace that app-to-viewer contract with a digest pin or copied asset hash allowlist.
+- Keep immutable digests in build attestations and registry metadata for audit evidence. They are
+  observations of a build, not the app's dependency selector.
+- A broken upstream viewer is handled by fixing or reverting the viewer release and rebuilding the
+  app.
 
 ## Architecture
 

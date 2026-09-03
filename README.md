@@ -2,6 +2,34 @@
 
 > **BreachSAFE fork.** This is a private BreachSAFE fork of [PQCA/cbomkit](https://github.com/PQCA/cbomkit) (Apache-2.0, originally IBM Research), used as the embedded **QuReddy CBOM Viewer**. Changes: host-app CBOM loading (postMessage + `?cbom` URL), report-mode rendering, and BreachSAFE branding. Upstream licence in `LICENSE.txt` is unmodified.
 
+## Contents
+
+1. [Release channel](#release-channel)
+2. [Quickstart](#quickstart)
+3. [Architecture](#architecture)
+   1. [Frontend and CBOMkit-coeus](#frontend-and-cbomkit-coeus)
+      1. [CBOMkit-coeus](#cbomkit-coeus)
+   2. [API Server](#api-server)
+      1. [Features](#features)
+   3. [Compliance](#compliance)
+      1. [External Compliance Evaluation](#external-compliance-evaluation)
+         1. [Policy Definition in OPA](#policy-definition-in-opa)
+         2. [Findings Format](#findings-format)
+         3. [Evaluation Results](#evaluation-results)
+      2. [Configuration](#configuration)
+   4. [Handling of Credentials](#handling-of-credentials)
+   5. [Scanning and CBOM Generation](#scanning-and-cbom-generation)
+      1. [Supported languages and libraries](#supported-languages-and-libraries)
+4. [Contribution Guidelines](#contribution-guidelines)
+5. [License](#license)
+
+## Release channel
+
+`ghcr.io/breachsafe/qureddy-cbom-viewer:latest` is the current released viewer consumed by
+QuReddy App builds. A successful GitHub release publishes `latest` together with the release's
+semantic-version tags. Consumers must request a fresh pull during every build so the tag resolves
+to the newest published viewer.
+
 
 [![License](https://img.shields.io/github/license/cbomkit/cbomkit.svg)](https://opensource.org/licenses/Apache-2.0) <!--- long-description-skip-begin -->
 [![Current Release](https://img.shields.io/github/release/cbomkit/cbomkit.svg)](https://github.com/cbomkit/cbomkit/releases)
