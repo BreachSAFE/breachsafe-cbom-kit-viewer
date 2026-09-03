@@ -1,5 +1,8 @@
 # CBOMkit - the essentials for CBOMs
 
+> **BreachSAFE fork.** This is a private BreachSAFE fork of [PQCA/cbomkit](https://github.com/PQCA/cbomkit) (Apache-2.0, originally IBM Research), used as the embedded **QuReddy CBOM Viewer**. Changes: host-app CBOM loading (postMessage + `?cbom` URL), report-mode rendering, and BreachSAFE branding. Upstream licence in `LICENSE.txt` is unmodified.
+
+
 [![License](https://img.shields.io/github/license/cbomkit/cbomkit.svg)](https://opensource.org/licenses/Apache-2.0) <!--- long-description-skip-begin -->
 [![Current Release](https://img.shields.io/github/release/cbomkit/cbomkit.svg)](https://github.com/cbomkit/cbomkit/releases)
 
