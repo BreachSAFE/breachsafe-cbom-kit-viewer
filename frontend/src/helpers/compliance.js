@@ -1,6 +1,10 @@
 import { model } from "@/model.js";
 import { getDetections, getLocalComplianceServiceName } from "@/helpers.js";
 
+export function isInventoryMode() {
+  return new URLSearchParams(window.location.search).get("mode") === "inventory";
+}
+
 // Dictionary mapping the icon enum values to the actual icon names
 export const complianceIconMap = {
   CHECKMARK: 'Checkmark24',

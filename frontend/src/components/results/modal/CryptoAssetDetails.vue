@@ -28,7 +28,7 @@
     </div>
 
     <!-- POLICY FINDINGS -->
-    <div v-if="hasValidComplianceResults">
+    <div v-if="!isInventoryMode && hasValidComplianceResults">
       <div
         style="
           display: flex;
@@ -139,7 +139,8 @@ import {
   getCompliancePolicyName,
   getComplianceLabel,
   getComplianceObjectFromId,
-  resolvePath
+  resolvePath,
+  isInventoryMode,
 } from "@/helpers";
 import {
   Launch16,
@@ -211,6 +212,7 @@ export default {
     asset: null,
   },
   computed: {
+    isInventoryMode,
     hasValidComplianceResults,
     getCompliancePolicyName,
     filteredProperties() {
