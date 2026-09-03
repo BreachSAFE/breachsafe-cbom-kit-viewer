@@ -1,0 +1,5 @@
+# BreachSAFE QuReddy CBOM Viewer — fork of PQCA/cbomkit frontend (Apache-2.0). Static SPA on nginx.
+FROM nginx:alpine
+COPY dist /usr/share/nginx/html
+RUN printf 'server { listen 8000; root /usr/share/nginx/html; location / { try_files $uri $uri/ /index.html; } }\n' > /etc/nginx/conf.d/default.conf
+EXPOSE 8000

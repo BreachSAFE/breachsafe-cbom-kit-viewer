@@ -46,3 +46,4 @@ nb-configuration.xml
 .claude/settings.local.json
 .claude/worktrees
 .superpowers
+frontend/dist/
