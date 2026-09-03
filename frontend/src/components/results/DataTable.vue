@@ -225,6 +225,7 @@ export default {
       Maximize24,
       currentAssetModal: null,
       currentPagination: null,
+      reportMode: new URLSearchParams(window.location.search).get('cbom') != null,
       openInCodeOnConfirm: false, // If true, the user has clicked on the button to get the prompt. If false, the prompt was shown after the user tried to openInCode.
       columns: ["Cryptographic asset", "Type", "Primitive", "Location"],
       downloadIcon: `<svg fill-rule="evenodd" height="16" name="download" role="img" viewBox="0 0 14 16" width="14" aria-label="Download" alt="Download">
@@ -247,6 +248,9 @@ export default {
       return getDetections();
     },
     paginatedDetections() {
+      if (this.reportMode) {
+        return this.detections;
+      }
       if (this.currentPagination == null) {
         return [];
       } else {

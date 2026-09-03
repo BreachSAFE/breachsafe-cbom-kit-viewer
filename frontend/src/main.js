@@ -27,6 +27,15 @@ new Vue({
         }
       }
     });
+    // BQP: load a CBOM from ?cbom=<same-origin-url> so a headless browser can print it.
+    try {
+      const _cbomUrl = new URLSearchParams(window.location.search).get('cbom');
+      if (_cbomUrl) {
+        fetch(_cbomUrl).then((r) => r.json()).then((cbom) => {
+          if (cbom && cbom.components) showResultFromUpload(cbom, 'report');
+        }).catch((e) => console.error('cbom url load failed', e));
+      }
+    } catch (e) { console.error(e); }
     // TODO: uncomment
     // window.onbeforeunload = function () {
     //   if (model.showResults) {
