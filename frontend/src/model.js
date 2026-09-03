@@ -2,7 +2,7 @@ import { reactive } from "vue";
 
 export const model = reactive({
   // STATE
-  useDarkMode: false,
+  useDarkMode: true,
   showResults: false,
   showDebugging: false,
   cbom: null,

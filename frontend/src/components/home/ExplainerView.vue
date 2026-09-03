@@ -36,7 +36,7 @@ export default {
       model,
       text: "The Cryptography Bill of Materials (CBOM) is an object model that describes cryptographic assets and their dependencies, aiming to simplify the management of cryptography inventory and accelerate the migration to quantum-safe solutions. CycloneDX version 1.6, which incorporates the Cryptographic Bill of Materials (CBOM) capability, has recently achieved international recognition by being adopted as an ECMA standard. This development underscores the growing importance and acceptance of CycloneDX in the software supply chain security landscape. Overall, CBOM significantly enhances visibility into the cryptographic aspects of the software supply chain, enabling organizations to better manage risks, ensure compliance, and prepare for future cryptographic challenges, including the transition to quantum-safe cryptography.",
       urlSpecification: "https://github.com/CycloneDX/specification",
-      urlBlogPost: "https://ecma-international.org/news/ecma-new-standard-ecma-424-on-cyclonedx-bill-of-materials/",
+      urlBlogPost: "https://breachsafe.io/blog",
       urlLearnMore: "https://cyclonedx.org/capabilities/cbom/",
       Launch20,
       LogoGithub20,

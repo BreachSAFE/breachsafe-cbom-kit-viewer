@@ -1,13 +1,13 @@
 <!-- The HeaderBar contains the button to toggle between auto, light and dark themes -->
 <!-- It is also the component responsible to listen to OS theme changes and subsequently update model.useDarkMode -->
 <template>
-  <cv-header aria-label="Carbon header">
+  <cv-header aria-label="QuReddy CBOM header">
     <cv-header-name
-      href="https://research.ibm.com"
-      prefix="IBM"
+      href="https://breachsafe.io"
+      prefix="BreachSAFE"
       target="_blank"
     >
-      Research
+      QuReddy
     </cv-header-name>
     <template v-slot:header-global>
       <h4 style="margin: auto 0px auto -25px; color: white">|</h4>
@@ -38,7 +38,7 @@ export default {
   data() {
     return {
       model,
-      renderedTheme: "auto",
+      renderedTheme: "dark",
       isDarkModeOS: false,
     };
   },
