@@ -82,7 +82,6 @@
           :icon="SettingsAdjust24"
         ></cv-icon-button>
         <cv-button
-          v-if="!isViewerOnly"
           @click="downloadCBOM"
           :disabled="model.scanning.isScanning"
           :icon="downloadIcon"
