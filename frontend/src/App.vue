@@ -9,7 +9,10 @@
     <div class="main">
       <!-- PRODUCTION APP -->
       <HeaderBar />
-      <div style="padding: 60px 4% 1%" />
+      <!-- Spacer only reserves horizontal gutters now. The header is position:static (see
+           breachsafe-brand.css), so the old 60px top offset for a fixed header just detached
+           the header from the report. Drop the top offset so they sit flush. -->
+      <div style="padding: 0 4% 1%" />
       <NotificationsView />
       <Transition :name="transitionName" mode="out-in">
         <ResultsView v-if="model.showResults" />
