@@ -1,74 +1,38 @@
 <template>
-  <div>
-    <c4d-footer-container
-    size="short"
-    disable-locale-button="true"
-  >
-  </c4d-footer-container>
-  </div>
+  <footer class="qureddy-footer" aria-label="QuReddy CBOM viewer footer">
+    <span>QuReddy CBOM Viewer</span>
+    <span aria-hidden="true">·</span>
+    <a href="https://breachsafe.io" target="_blank" rel="noopener noreferrer">
+      by BreachSAFE
+    </a>
+  </footer>
 </template>
 
 <script>
-import { model } from "@/model.js";
-import '@carbon/ibmdotcom-web-components/es/components/footer/footer-container';
-
 export default {
-  name: "ReturnButton",
-  data() {
-    return {
-      model,
-    };
-  },
+  name: "FooterView",
 };
 </script>
 
 <style scoped>
-.footer-link {
-  color: white;
-  padding-bottom: 12px;
-  font-size: medium;
-  cursor: pointer;
-}
-.footer-links {
+.qureddy-footer {
+  align-items: center;
+  background: #161616;
+  color: #f4f4f4;
   display: flex;
-  flex-wrap: wrap;
+  font-size: 0.875rem;
+  gap: 0.5rem;
   justify-content: center;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
 }
 
-.footer-column {
-  flex: 1;
-  margin: 10px;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-}
-
-.footer-column cv-link {
-  margin-bottom: 10px;
+.qureddy-footer a {
+  color: #78dce8;
   text-decoration: none;
-  color: #333;
 }
 
-@media (min-width: 900px) {
-  .footer-column {
-    flex-basis: calc(33.33% - 20px);
-  }
-}
-
-@media (max-width: 899px) {
-  .footer-column {
-    flex-basis: calc(50% - 20px);
-  }
-}
-
-/* Allows to modify the color of cv-links */
-.bx--link:hover {
-  color: lightblue;
-}
-.bx--link:visited:hover {
-  color: lightblue;
-}
-.bx--link:visited {
-  color: white;
+.qureddy-footer a:hover {
+  text-decoration: underline;
 }
 </style>
