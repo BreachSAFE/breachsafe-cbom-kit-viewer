@@ -1,0 +1,31 @@
+name: Container Build Policy
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  no-emulation:
+    name: No emulated container builds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Enforce standard-image policy
+        shell: bash
+        run: |
+          qemu_action="setup-q""emu-action"
+          arm_platform="linux/ar""m64"
+          if grep -R -n -- "$qemu_action" .github/workflows; then
+            echo "QEMU container-build setup is prohibited." >&2
+            exit 1
+          fi
+          if grep -R -n -- "$arm_platform" .github/workflows; then
+            echo "Only the standard linux/amd64 publish platform is supported." >&2
+            exit 1
+          fi
