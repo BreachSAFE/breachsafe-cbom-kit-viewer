@@ -6,7 +6,8 @@
 
 1. [Release channel](#release-channel)
 2. [Quickstart](#quickstart)
-3. [Architecture](#architecture)
+3. [Embedded viewer contract](#embedded-viewer-contract)
+4. [Architecture](#architecture)
    1. [Frontend and CBOMkit-coeus](#frontend-and-cbomkit-coeus)
       1. [CBOMkit-coeus](#cbomkit-coeus)
    2. [API Server](#api-server)
@@ -20,8 +21,8 @@
    4. [Handling of Credentials](#handling-of-credentials)
    5. [Scanning and CBOM Generation](#scanning-and-cbom-generation)
       1. [Supported languages and libraries](#supported-languages-and-libraries)
-4. [Contribution Guidelines](#contribution-guidelines)
-5. [License](#license)
+5. [Contribution Guidelines](#contribution-guidelines)
+6. [License](#license)
 
 ## Release channel
 
@@ -76,6 +77,32 @@ Next steps:
 
 > [!NOTE]
 > By default, the service can be accessed at http://localhost:8001
+
+## Embedded viewer contract
+
+An embedding application sends the original CBOM artifact to the viewer with a same-origin
+`postMessage`. The viewer verifies the source window, origin, byte count, SHA-256 digest, media
+type, encoding, and filename before parsing or rendering the artifact.
+
+| Field | Requirement |
+|---|---|
+| `type` | Literal `breachsafe.cbom.load.v1` |
+| `artifact.filename` | Original basename, such as `scan.cdx.json` |
+| `artifact.mediaType` | Literal `application/json` |
+| `artifact.encoding` | Literal `base64` |
+| `artifact.byteLength` | Decoded artifact byte count |
+| `artifact.sha256` | SHA-256 of the decoded bytes as 64 lowercase hexadecimal characters |
+| `artifact.data` | Base64 encoding of the original artifact bytes |
+
+The artifact limit is 50 MiB. `filename` must be a cross-platform basename of at most 255
+characters. Path separators, control characters, Windows-invalid characters, and Windows device
+names are rejected. A recognized message with invalid metadata clears the current result and does
+not expose a download. `Download CBOM` returns the verified original bytes and filename. `Save as
+PDF` prints the rendered representation of those bytes.
+
+The host must use the viewer's exact origin as the `postMessage` target origin. Delivery
+acknowledgements and configurable embedding origins remain tracked in
+[issue #12](https://github.com/BreachSAFE/breachsafe-cbom-kit-viewer/issues/12).
 
 Deploy using the helm chart to a kubernetes environment. Pass the domain suffix and the cbomkit database creds via helm parameters.
 ```shell

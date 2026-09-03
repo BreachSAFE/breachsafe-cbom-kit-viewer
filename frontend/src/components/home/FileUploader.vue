@@ -37,7 +37,7 @@
 import { model, ErrorStatus } from "@/model.js";
 import { isViewerOnly } from "@/helpers.js";
 import { CloudUpload24 } from "@carbon/icons-vue";
-import { showResultFromUpload } from "@/helpers";
+import { showResultFromBytes } from "@/helpers";
 
 export default {
   name: "FileUploader",
@@ -64,8 +64,8 @@ export default {
         this.uploadedFiles.shift();
       }
       this.fileReader = new FileReader();
-      this.fileReader.readAsText(this.uploadedFiles[0].file);
       this.fileReader.addEventListener("load", this.onLoadingComplete);
+      this.fileReader.readAsArrayBuffer(this.uploadedFiles[0].file);
     },
     onLoadingComplete: function () {
       if (this.uploadedFiles.length != 1) {
@@ -76,14 +76,10 @@ export default {
         return;
       }
       try {
-        let cbom = JSON.parse(this.fileReader.result);
         let name = this.uploadedFiles[0].file.name;
-        console.log(`Uploaded CBOM '${name}':`, cbom);
         this.$refs.test.setState(0, "complete");
-        showResultFromUpload(cbom, name);
+        showResultFromBytes(this.fileReader.result, name);
       } catch (error) {
-        let file = this.uploadedFiles[0].file;
-        console.log(file);
         this.$refs.test.setInvalidMessage(
           0,
           `Please upload a valid JSON file.`
