@@ -9,7 +9,6 @@
     <div class="main">
       <!-- PRODUCTION APP -->
       <HeaderBar />
-      <div style="padding: 60px 4% 1%" />
       <NotificationsView />
       <Transition :name="transitionName" mode="out-in">
         <ResultsView v-if="model.showResults" />
@@ -80,7 +79,7 @@ export default {
 
 <style scoped>
 .main {
-  max-width: 1200px;
+  max-width: none;
   min-height: 100vh; /* Set main height to 100% of the viewport height */
   margin: auto;
 }

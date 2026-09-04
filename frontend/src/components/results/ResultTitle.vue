@@ -1,8 +1,8 @@
 <template>
   <div>
     <cv-tile style="padding: 0px">
-      <div style="padding: 16px; padding-bottom: 8px">
-        <div>
+      <div class="result-heading">
+        <div class="result-heading-copy">
           <h3 style="padding-bottom: 6px; font-weight: 500">
             {{ dataTableTitle }}
           </h3>
@@ -12,6 +12,7 @@
           <cv-tag v-if="showCommitID" :label="commitIDLabel" />
           <cv-tag v-if="showSubfolder" :label="subfolderLabel" />
         </div>
+        <ReturnButton class="result-reset cbom-screen-only" />
       </div>
       <div v-if="getDetections().length > 0 || model.scanning.isScanning">
         <RegulatorResults v-if="!isInventoryMode" style="padding-top: 12px" />
@@ -32,6 +33,7 @@ import {
 } from "@/helpers";
 import RegulatorResults from "@/components/results/RegulatorResults.vue";
 import StatisticsView from "@/components/results/StatisticsView.vue";
+import ReturnButton from "@/components/results/ReturnButton.vue";
 
 export default {
   name: "ResultsTitle",
@@ -43,6 +45,7 @@ export default {
   components: {
     RegulatorResults,
     StatisticsView,
+    ReturnButton,
   },
   computed: {
     isInventoryMode,
@@ -146,3 +149,21 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.result-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1rem 0.5rem;
+}
+
+.result-heading-copy {
+  min-width: 0;
+}
+
+.result-reset {
+  flex: none;
+  margin-left: auto;
+}
+</style>
