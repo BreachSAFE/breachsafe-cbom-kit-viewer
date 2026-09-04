@@ -12,6 +12,7 @@
 /* header → dark grey + orange accent */
 .cv-header, .bx--header, header.cv-header {
   background-color:#1f2937 !important; border-bottom:2px solid #f97316 !important;
+  position: static !important;
 }
 .cv-header a, .cv-header .bx--header__name { color:#f97316 !important; }
 /* primary buttons → orange */
@@ -21,8 +22,6 @@
 a, .bx--link { color:#f97316 !important; }
 /* grey surfaces */
 .bx--tile, .cv-tile, .bx--structured-list, .bx--data-table { background:#1f2937 !important; }
-.cv-header::after { content:""; display:block; height:3px; width:100%;
-  background:#f97316; position:absolute; bottom:-2px; left:0; }
 /* default the embed to dark so it matches the host app */
 body, #app, .cds--white { background:#0b0f14 !important; color:#f4f4f4 !important; }
 .bx--tile, .cv-tile { background:#1f2937 !important; color:#f4f4f4 !important; }
@@ -36,16 +35,9 @@ body, #app, .cds--white { background:#0b0f14 !important; color:#f4f4f4 !importan
     -webkit-print-color-adjust: exact;
   }
   .cbom-screen-only, .bx--pagination { display: none !important; }
-  /* Header must flow with the page, not float over the CBOM render. Carbon's cv-header is
-     position:fixed; on print that pins it to the viewport and it overlaps the content below
-     (the chart legend). Make it static and drop the offset the fixed header reserved. */
-  .cv-header, .bx--header { position: static !important; box-shadow: none !important; }
+  .cv-header, .bx--header { box-shadow: none !important; }
   .bx--content, .cds--content, .bx--header-panel, main, #app { margin-top: 0 !important; padding-top: 0 !important; }
   .main { max-width: none !important; }
   .bx--tile svg text { fill: #f4f4f4 !important; }
   .bx--data-table tr { break-inside: avoid; }
 }
-
-/* The report body and the header must share one width. App.vue caps .main at 1200px while the
-   Carbon header spans the panel, so the two read as disjointed. Let the doc fill to the header. */
-.main { max-width: none !important; }

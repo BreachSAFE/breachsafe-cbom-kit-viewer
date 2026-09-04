@@ -184,9 +184,10 @@
                 display: inline-block;
               "
             >
-              {{ fileName(occurrences(asset)) }}:{{
-                lineNumber(occurrences(asset))
-              }}
+              {{ fileName(occurrences(asset)) }}<template
+                v-if="lineNumber(occurrences(asset)) !== ''"
+                >:{{ lineNumber(occurrences(asset)) }}</template
+              >
             </cv-link>
           </cv-data-table-cell>
           <cv-data-table-cell>
@@ -503,6 +504,13 @@ export default {
     },
     lineNumber(detection) {
       if (detection === undefined || detection === null) {
+        return "";
+      }
+      if (
+        !Object.hasOwn(detection, "line") ||
+        detection.line === null ||
+        detection.line === ""
+      ) {
         return "";
       }
       return detection.line;

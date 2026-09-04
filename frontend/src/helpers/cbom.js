@@ -18,14 +18,6 @@ function checkCbomValidity(cbom) {
       isValid = false;
       errorMessages.push("Missing mandatory field: specVersion.");
     }
-    if (!Object.hasOwn(cbom, "serialNumber")) {
-      isValid = false;
-      errorMessages.push("Missing mandatory field: serialNumber.");
-    }
-    if (!Object.hasOwn(cbom, "version")) {
-      isValid = false;
-      errorMessages.push("Missing mandatory field: version.");
-    }
     if (!Object.hasOwn(cbom, "components")) {
       // We can have a valid CBOM with no components
       return;
