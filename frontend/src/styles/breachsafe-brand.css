@@ -38,16 +38,9 @@ body, #app, .cds--white { background:#0b0f14 !important; color:#f4f4f4 !importan
     -webkit-print-color-adjust: exact;
   }
   .cbom-screen-only, .bx--pagination { display: none !important; }
-  /* Header must flow with the page, not float over the CBOM render. Carbon's cv-header is
-     position:fixed; on print that pins it to the viewport and it overlaps the content below
-     (the chart legend). Make it static and drop the offset the fixed header reserved. */
-  .cv-header, .bx--header { position: static !important; box-shadow: none !important; }
+  .cv-header, .bx--header { box-shadow: none !important; }
   .bx--content, .cds--content, .bx--header-panel, main, #app { margin-top: 0 !important; padding-top: 0 !important; }
   .main { max-width: none !important; }
   .bx--tile svg text { fill: #f4f4f4 !important; }
   .bx--data-table tr { break-inside: avoid; }
 }
-
-/* The report body and the header must share one width. App.vue caps .main at 1200px while the
-   Carbon header spans the panel, so the two read as disjointed. Let the doc fill to the header. */
-.main { max-width: none !important; }
