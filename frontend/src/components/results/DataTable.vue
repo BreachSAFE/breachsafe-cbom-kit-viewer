@@ -93,6 +93,7 @@
           @click="showPrompt(false)"
           :disabled="model.scanning.isScanning"
           :icon="SettingsAdjust24"
+          label="Table display settings"
         ></cv-icon-button>
         <cv-button
           class="cbom-export-button cbom-screen-only"

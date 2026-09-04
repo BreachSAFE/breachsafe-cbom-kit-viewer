@@ -168,6 +168,15 @@ test("accepts optional CycloneDX root identity fields", async ({ page }) => {
   expect(page.frontendErrors).toEqual([]);
 });
 
+test("names the document language and icon-only table control", async ({
+  page,
+}) => {
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(
+    page.getByRole("button", { name: "Table display settings" })
+  ).toBeVisible();
+});
+
 test("keeps the header attached when hosted in an iframe", async ({ page }) => {
   await page.setViewportSize({ width: 1200, height: 900 });
   await page.setContent(`
