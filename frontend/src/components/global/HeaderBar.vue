@@ -31,7 +31,7 @@
 
 <script>
 import { model } from "@/model.js";
-import { getTitle } from "@/helpers.js";
+import { getRequestedTheme, getTitle } from "@/helpers.js";
 import { Awake24, Moon24, BrightnessContrast24 } from "@carbon/icons-vue";
 
 export default {
@@ -92,9 +92,17 @@ export default {
 
     darkModeMediaQuery.addEventListener("change", darkModeChanged);
 
-    // Ensure initial state is set correctly
+    // An embedding application can pin the initial theme independently of the
+    // host OS. The viewer's theme control remains available to the user.
     this.isDarkModeOS = darkModeMediaQuery.matches;
-    model.useDarkMode = darkModeMediaQuery.matches;
+    const requestedTheme = getRequestedTheme();
+    if (requestedTheme) {
+      this.renderedTheme = requestedTheme;
+      model.useDarkMode = requestedTheme === "dark";
+    } else {
+      this.renderedTheme = "auto";
+      model.useDarkMode = darkModeMediaQuery.matches;
+    }
   },
 };
 </script>

@@ -24,6 +24,7 @@ a, .bx--link { color:#f97316 !important; }
 .bx--data-table .bx--link { color:#c2410c !important; }
 /* grey surfaces */
 .bx--tile, .cv-tile, .bx--structured-list, .bx--data-table { background:#1f2937 !important; }
+.bx--structured-list-th, .bx--structured-list-td { color:#f4f4f4 !important; }
 /* default the embed to dark so it matches the host app */
 body, #app, .cds--white { background:#0b0f14 !important; color:#f4f4f4 !important; }
 .bx--tile, .cv-tile { background:#1f2937 !important; color:#f4f4f4 !important; }

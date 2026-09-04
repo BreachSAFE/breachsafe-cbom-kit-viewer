@@ -53,6 +53,10 @@ export default {
         kind = "error";
         title = "Invalid CBOM";
         description = "The provided CBOM does not respect the expected format.";
+      } else if (error.status === ErrorStatus.UnsupportedCbomVersion) {
+        kind = "warning";
+        title = "Unsupported CycloneDX version";
+        description = "This viewer supports CycloneDX 1.6 and 1.7 CBOMs.";
       } else if (error.status === ErrorStatus.IgnoredComponent) {
         kind = "info";
         title = "Some components are not shown";

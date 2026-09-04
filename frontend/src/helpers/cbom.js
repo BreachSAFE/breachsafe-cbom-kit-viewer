@@ -1,64 +1,30 @@
 import {ErrorStatus, model} from "@/model.js";
+import {validateCycloneDxBom} from "@/helpers/cyclonedx-validation.js";
+import {isSourceCodeOccurrence} from "@/helpers/general.js";
 
-// This function partially checks the CBOM properties that are necessary for the frontend, but does not formally verifies the validity of the CBOM format
 function checkCbomValidity(cbom) {
-  var isValid = true;
-  var isIgnoringSomeComponent = false;
-  var errorMessages = [];
+  const validation = validateCycloneDxBom(cbom);
+  const components = cbom && Array.isArray(cbom.components) ? cbom.components : [];
+  const isIgnoringSomeComponent = components.some(
+    (component) => component.type !== "cryptographic-asset"
+  );
 
-  if (cbom === undefined || cbom == null) {
-    isValid = false;
-    errorMessages.push("CBOM is undefined or null.");
-  } else {
-    if (!Object.hasOwn(cbom, "bomFormat")) {
-      isValid = false;
-      errorMessages.push("Missing mandatory field: bomFormat.");
-    }
-    if (!Object.hasOwn(cbom, "specVersion")) {
-      isValid = false;
-      errorMessages.push("Missing mandatory field: specVersion.");
-    }
-    if (!Object.hasOwn(cbom, "components")) {
-      // We can have a valid CBOM with no components
-      return;
-    } else if (!Array.isArray(cbom.components)) {
-      isValid = false;
-      errorMessages.push("Components field is not an array.");
-    } else {
-      cbom.components.forEach(function (component, index) {
-        if (!Object.hasOwn(component, "type")) {
-          isValid = false;
-          errorMessages.push(`Component at index ${index} is missing mandatory field: type.`);
-        } else {
-          if (component.type !== "cryptographic-asset") {
-            isIgnoringSomeComponent = true
-            console.warn(`Ignoring CBOM component at index ${index} of type: ${component.type}`)
-          } else {
-            if (!Object.hasOwn(component, "cryptoProperties")) {
-              isValid = false;
-              errorMessages.push(`Component at index ${index} is missing mandatory field: cryptoProperties.`);
-            }
-            // if (!Object.hasOwn(component, "evidence")) {
-            //   isValid = false;
-            //   errorMessages.push(`Component at index ${index} is missing mandatory field: evidence.`);
-            // } else if (!Object.hasOwn(component.evidence, "occurrences")) {
-            //   isValid = false;
-            //   errorMessages.push(`Component at index ${index} is missing mandatory field: evidence.occurrences.`);
-            // } else if (!Array.isArray(component.evidence.occurrences)) {
-            //   isValid = false;
-            //   errorMessages.push(`evidence.occurrences for component at index ${index} is not an array.`);
-            // }
-          }
-        }
-      });
-    }
-  }
-
-  if (isIgnoringSomeComponent) {
+  if (isIgnoringSomeComponent && validation.valid) {
     model.addError(ErrorStatus.IgnoredComponent);
   }
-  if (!isValid) {
-    console.error(`Invalid CBOM detected. ${errorMessages.length} errors:\n   - ${errorMessages.join("\n   - ")}`);
+
+  if (validation.unsupportedVersion) {
+    console.warn(
+      `Unsupported CycloneDX version: ${String(cbom && cbom.specVersion)}`
+    );
+    model.addError(ErrorStatus.UnsupportedCbomVersion);
+  } else if (!validation.valid) {
+    const errorMessages = validation.errors.map(
+      (error) => `${error.dataPath || "/"} ${error.message}`
+    );
+    console.error(
+      `Invalid CBOM detected. ${errorMessages.length} errors:\n   - ${errorMessages.join("\n   - ")}`
+    );
     model.addError(ErrorStatus.InvalidCbom);
   }
 }
@@ -331,18 +297,21 @@ export function getDetectionsFromCbom(cbom) {
     }
     if (Object.hasOwn(cbom, "components") && Array.isArray(cbom.components)) {
       var detections = [];
-      // In a CBOM, each component can be detected in several contexts.
-      // To display them, we 'unwrap' all contexts and return a list of detections where each component appears with a single context.
+      // Keep source-code locations independently navigable, while grouping
+      // endpoint evidence records that describe the same asset at one URI.
       cbom.components.forEach(function (component) {
         if (Object.hasOwn(component, "type") && component.type === "cryptographic-asset") {
-          if (
-              Object.hasOwn(component, "evidence") &&
-              Object.hasOwn(component.evidence, "occurrences") &&
-              Array.isArray(component.evidence.occurrences)
-          ) {
-            component.evidence.occurrences.forEach(function (
-              singleContext
-            ) {
+          const occurrences = component.evidence?.occurrences;
+          if (Array.isArray(occurrences) && occurrences.length > 0) {
+            const sourceCodeOccurrences = occurrences.filter(isSourceCodeOccurrence);
+            const otherOccurrences = occurrences.filter(
+              (occurrence) => !isSourceCodeOccurrence(occurrence)
+            );
+
+            // Keep file-and-line source contexts independently navigable. Endpoint
+            // evidence records are facets of one component and must not inflate the
+            // cryptographic-asset count or duplicate the table row.
+            sourceCodeOccurrences.forEach(function (singleContext) {
               let detectionWithSingleContext = JSON.parse(
                 JSON.stringify(component)
               );
@@ -350,6 +319,23 @@ export function getDetectionsFromCbom(cbom) {
                 singleContext,
               ];
               detections.push(detectionWithSingleContext);
+            });
+
+            const endpointOccurrencesByLocation = new Map();
+            otherOccurrences.forEach((occurrence) => {
+              const key = occurrence.location;
+              if (!endpointOccurrencesByLocation.has(key)) {
+                endpointOccurrencesByLocation.set(key, []);
+              }
+              endpointOccurrencesByLocation.get(key).push(occurrence);
+            });
+
+            endpointOccurrencesByLocation.forEach((groupedOccurrences) => {
+              let detectionWithEndpointEvidence = JSON.parse(
+                JSON.stringify(component)
+              );
+              detectionWithEndpointEvidence.evidence.occurrences = groupedOccurrences;
+              detections.push(detectionWithEndpointEvidence);
             });
           } else {
             // The component has no occurence

@@ -1,7 +1,34 @@
 <template>
   <div style="padding: 20px 10px">
+    <!-- ENDPOINT EVIDENCE -->
+    <div v-if="hasEndpointLocation()">
+      <h4 style="font-weight: 500; padding-bottom: 4px">Endpoint evidence</h4>
+      <p style="padding: 4px 0 12px">
+        <strong>Observed at:</strong> {{ endpointOccurrences()[0].location }}
+      </p>
+      <div class="list endpoint-evidence-list">
+        <cv-structured-list condensed="true">
+          <template slot="headings">
+            <cv-structured-list-heading>Observation</cv-structured-list-heading>
+            <cv-structured-list-heading>Evidence type</cv-structured-list-heading>
+            <cv-structured-list-heading>Collector</cv-structured-list-heading>
+          </template>
+          <template slot="items">
+            <cv-structured-list-item
+              v-for="(evidence, evidenceIndex) in endpointEvidenceRows()"
+              :key="evidenceIndex"
+            >
+              <cv-structured-list-data>{{ evidence.observation || "Not reported" }}</cv-structured-list-data>
+              <cv-structured-list-data>{{ evidence.evidenceType || "Not reported" }}</cv-structured-list-data>
+              <cv-structured-list-data>{{ evidence.collector || "Not reported" }}</cv-structured-list-data>
+            </cv-structured-list-item>
+          </template>
+        </cv-structured-list>
+      </div>
+    </div>
+
     <!-- CODE -->
-    <div>
+    <div v-else>
       <div
         style="
           display: flex;
@@ -141,6 +168,9 @@ import {
   getComplianceObjectFromId,
   resolvePath,
   isInventoryMode,
+  isEndpointOccurrence,
+  isSourceCodeOccurrence,
+  parseOccurrenceContext,
 } from "@/helpers";
 import {
   Launch16,
@@ -242,7 +272,27 @@ export default {
     resolvePath,
     hasCodeLocation() {
       let occurences = this.getPropertyValues("evidence.occurrences")
-      return occurences !== null && occurences !== undefined
+      return Array.isArray(occurences) && occurences.some(isSourceCodeOccurrence)
+    },
+    endpointOccurrences() {
+      const occurrences = this.getPropertyValues("evidence.occurrences");
+      if (!Array.isArray(occurrences)) {
+        return [];
+      }
+      return occurrences.filter(isEndpointOccurrence);
+    },
+    hasEndpointLocation() {
+      return this.endpointOccurrences().length > 0;
+    },
+    endpointEvidenceRows() {
+      return this.endpointOccurrences().map((occurrence) => {
+        const context = parseOccurrenceContext(occurrence);
+          return {
+            observation: context.observation,
+            evidenceType: context.evidence_type,
+            collector: context.source,
+          };
+      });
     },
     // Utility method to safely access nested properties, and return an array of values
     getPropertyValues(path) {

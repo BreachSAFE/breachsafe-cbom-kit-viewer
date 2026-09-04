@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="{ 'compact-results': isCompactLayout }">
     <ResultTitle class="result-title" />
     <DataTable class="data-table" />
   </div>
@@ -9,6 +9,7 @@
 import { model } from "@/model.js";
 import DataTable from "@/components/results/DataTable.vue";
 import ResultTitle from "@/components/results/ResultTitle.vue";
+import { isCompactLayout } from "@/helpers.js";
 
 export default {
   name: "ResultsView",
@@ -20,6 +21,9 @@ export default {
     return {
       model,
     };
+  },
+  computed: {
+    isCompactLayout,
   },
 };
 </script>
@@ -35,5 +39,8 @@ export default {
 .data-table {
   padding: 0% 5%;
   padding-bottom: 100px;
+}
+.compact-results .data-table {
+  padding-bottom: 1rem;
 }
 </style>

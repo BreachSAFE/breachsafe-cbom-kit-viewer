@@ -4,6 +4,7 @@
     :class="{
       'make-the-carbon-theme-go-dark': model.useDarkMode,
       'make-the-carbon-theme-go-white': !model.useDarkMode,
+      'compact-layout': isCompactLayout,
     }"
   >
     <div class="main">
@@ -42,6 +43,7 @@ import ResultsView from "@/components/results/ResultsView.vue";
 import NotificationsView from "@/components/global/NotificationsView.vue";
 import FooterView from "@/components/global/FooterView.vue";
 import DebugView from "@/components/DebugView.vue";
+import { isCompactLayout } from "@/helpers.js";
 import "@/styles/carbon-both.css"; // This stylesheet contains both light and dark modes
 
 export default {
@@ -62,6 +64,7 @@ export default {
     };
   },
   computed: {
+    isCompactLayout,
     transitionName() {
       return this.model.showResults ? "slide-results" : "slide-home";
     },
@@ -82,6 +85,9 @@ export default {
   max-width: none;
   min-height: 100vh; /* Set main height to 100% of the viewport height */
   margin: auto;
+}
+.compact-layout .main {
+  min-height: auto;
 }
 /* For the debugging view */
 .container {

@@ -8,6 +8,98 @@ export function isViewerOnly() {
   return String(process.env.VUE_APP_VIEWER_ONLY) === "true";
 }
 
+export function isCompactLayout() {
+  return new URLSearchParams(window.location.search).get("layout") === "compact";
+}
+
+export function getRequestedTheme() {
+  const theme = new URLSearchParams(window.location.search).get("theme");
+  return theme === "dark" || theme === "light" ? theme : null;
+}
+
+const URI_LOCATION_PATTERN = /^[a-z][a-z0-9+.-]*:\/\//i;
+
+export function isEndpointOccurrence(occurrence) {
+  if (!occurrence || typeof occurrence.location !== "string") {
+    return false;
+  }
+  return URI_LOCATION_PATTERN.test(occurrence.location) &&
+    !occurrence.location.toLowerCase().startsWith("file://");
+}
+
+export function isSourceCodeOccurrence(occurrence) {
+  return Boolean(
+    occurrence &&
+    typeof occurrence.location === "string" &&
+    !isEndpointOccurrence(occurrence) &&
+    occurrence.line !== undefined &&
+    occurrence.line !== null &&
+    occurrence.line !== ""
+  );
+}
+
+export function parseOccurrenceContext(occurrence) {
+  if (!occurrence || typeof occurrence.additionalContext !== "string") {
+    return {};
+  }
+
+  return occurrence.additionalContext.split(";").reduce((fields, token) => {
+    const separator = token.indexOf("=");
+    if (separator > 0) {
+      const key = token.slice(0, separator).trim();
+      if (key) {
+        fields[key] = token.slice(separator + 1).trim();
+      }
+    }
+    return fields;
+  }, {});
+}
+
+const OBSERVATION_RANK = Object.freeze({
+  no_response: 0,
+  unknown: 1,
+  rejected: 2,
+  observed: 3,
+  offered: 4,
+  negotiated: 5,
+});
+
+export function selectPrimaryOccurrence(occurrences) {
+  if (!Array.isArray(occurrences) || occurrences.length === 0) {
+    return null;
+  }
+
+  return occurrences.reduce((primary, candidate) => {
+    const primaryObservation = parseOccurrenceContext(primary).observation;
+    const candidateObservation = parseOccurrenceContext(candidate).observation;
+    const primaryRank = OBSERVATION_RANK[primaryObservation] ?? -1;
+    const candidateRank = OBSERVATION_RANK[candidateObservation] ?? -1;
+    return candidateRank > primaryRank ? candidate : primary;
+  });
+}
+
+export function formatOccurrenceEvidenceSummary(occurrence) {
+  const fields = parseOccurrenceContext(occurrence);
+  const humanize = (value) => {
+    const readable = value.replaceAll("_", " ");
+    return readable.charAt(0).toUpperCase() + readable.slice(1);
+  };
+
+  const observation = fields.observation ? humanize(fields.observation) : "";
+  let evidenceType = "";
+  if (fields.evidence_type) {
+    const words = fields.evidence_type.split(".");
+    const scheme = typeof occurrence.location === "string"
+      ? occurrence.location.split("://", 1)[0]
+      : "";
+    if (scheme && words[0].toLowerCase() === scheme.toLowerCase()) {
+      words[0] = scheme.toUpperCase();
+    }
+    evidenceType = words.join(" ").replaceAll("_", " ");
+  }
+  return [observation, evidenceType].filter(Boolean).join(" · ");
+}
+
 export function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
@@ -122,4 +214,3 @@ export function limitString(str, limit) {
   }
   return str.slice(0, limit) + '...';
 }
-

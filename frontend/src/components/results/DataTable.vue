@@ -169,27 +169,43 @@
               </div> 
             </div>
           </cv-data-table-cell>
-          <cv-data-table-cell style="max-width: 200px; width: 30%">
+          <cv-data-table-cell style="max-width: 280px; width: 30%">
             <div v-if="occurrences(asset) == null" >
-              <em>No code location found</em>
+              <em>No evidence location found</em>
             </div>
-            <cv-link
-              v-else
+            <button
+              v-else-if="isSourceCodeOccurrence(occurrences(asset))"
+              type="button"
+              class="bx--link evidence-link evidence-link--source"
               @click="openInCodeFor({ index: rowIndex })"
-              style="
-                cursor: pointer;
-                max-width: 100%;
-                text-overflow: ellipsis;
-                overflow: hidden;
-                white-space: nowrap;
-                display: inline-block;
-              "
             >
               {{ fileName(occurrences(asset)) }}<template
                 v-if="lineNumber(occurrences(asset)) !== ''"
-                >:{{ lineNumber(occurrences(asset)) }}</template
+              >:{{ lineNumber(occurrences(asset)) }}</template
               >
-            </cv-link>
+            </button>
+            <div v-else>
+              <button
+                type="button"
+                class="bx--link evidence-link"
+                @click="showDetectionDetailsFor({ index: rowIndex })"
+              >
+                {{ occurrences(asset).location }}
+              </button>
+              <div
+                v-if="evidenceSummary(occurrences(asset))"
+                style="font-size: 0.75rem; margin-top: 0.25rem; opacity: 0.75"
+              >
+                {{ evidenceSummary(occurrences(asset)) }}
+              </div>
+              <div
+                v-if="additionalOccurrenceCount(asset) > 0"
+                style="font-size: 0.75rem; margin-top: 0.25rem; opacity: 0.75"
+              >
+                +{{ additionalOccurrenceCount(asset) }} more evidence
+                {{ additionalOccurrenceCount(asset) === 1 ? "record" : "records" }}
+              </div>
+            </div>
           </cv-data-table-cell>
           <cv-data-table-cell>
             <cv-icon-button
@@ -223,7 +239,10 @@ import {
   isLoadingCompliance,
   getComplianceDescription,
   isInventoryMode,
-  resolvePath
+  resolvePath,
+  formatOccurrenceEvidenceSummary,
+  isSourceCodeOccurrence,
+  selectPrimaryOccurrence,
 } from "@/helpers";
 import {
   Maximize24,
@@ -255,7 +274,7 @@ export default {
       printMode: false,
       reportMode: new URLSearchParams(window.location.search).get('cbom') != null,
       openInCodeOnConfirm: false, // If true, the user has clicked on the button to get the prompt. If false, the prompt was shown after the user tried to openInCode.
-      columns: ["Cryptographic asset", "Type", "Primitive", "Location"],
+      columns: ["Cryptographic asset", "Type", "Primitive", "Observed at"],
       downloadIcon: `<svg fill-rule="evenodd" height="16" name="download" role="img" viewBox="0 0 14 16" width="14" aria-label="Download" alt="Download">
         <title>Download</title>
         <path d="M7.506 11.03l4.137-4.376.727.687-5.363 5.672-5.367-5.67.726-.687 4.14 4.374V0h1v11.03z"></path>
@@ -491,10 +510,17 @@ export default {
     },
     occurrences(cryptoAsset) {
       let res = resolvePath(cryptoAsset, "evidence.occurrences");
-      if (res !== 0 && Array.isArray(res) && res.length > 0) {
-        return res[0];
-      }
-      return null;
+      return selectPrimaryOccurrence(res);
+    },
+    additionalOccurrenceCount(cryptoAsset) {
+      const res = resolvePath(cryptoAsset, "evidence.occurrences");
+      return Array.isArray(res) ? Math.max(0, res.length - 1) : 0;
+    },
+    isSourceCodeOccurrence(occurrence) {
+      return isSourceCodeOccurrence(occurrence);
+    },
+    evidenceSummary(occurrence) {
+      return formatOccurrenceEvidenceSummary(occurrence);
     },
     fileName(detection) {
       if (detection === undefined || detection === null) {
@@ -519,3 +545,22 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.evidence-link {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-align: left;
+}
+
+.evidence-link--source {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+</style>

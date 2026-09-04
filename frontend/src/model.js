@@ -89,6 +89,7 @@ export const ErrorStatus = {
   ScanError: "ScanError",
   JsonParsing: "JsonParsing",
   InvalidCbom: "InvalidCbom",
+  UnsupportedCbomVersion: "UnsupportedCbomVersion",
   IgnoredComponent: "IgnoredComponent",
   MultiUpload: "MultiUpload",
   EmptyDatabase: "EmptyDatabase",

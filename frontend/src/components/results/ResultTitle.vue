@@ -16,7 +16,7 @@
       </div>
       <div v-if="getDetections().length > 0 || model.scanning.isScanning">
         <RegulatorResults v-if="!isInventoryMode" style="padding-top: 12px" />
-        <StatisticsView style="padding: 22px 16px" />
+        <StatisticsView v-if="!isCompactLayout" style="padding: 22px 16px" />
       </div>
     </cv-tile>
   </div>
@@ -30,6 +30,8 @@ import {
   formatSeconds,
   limitString,
   isInventoryMode,
+  isCompactLayout,
+  isEndpointOccurrence,
 } from "@/helpers";
 import RegulatorResults from "@/components/results/RegulatorResults.vue";
 import StatisticsView from "@/components/results/StatisticsView.vue";
@@ -49,6 +51,7 @@ export default {
   },
   computed: {
     isInventoryMode,
+    isCompactLayout,
     showLink() {
       return model.codeOrigin.gitUrl != null;
     },
@@ -76,7 +79,9 @@ export default {
     dataTableTitle() {
       var title = "Unknown CBOM";
       if (model.codeOrigin.uploadedFileName != null) {
-        title = model.codeOrigin.uploadedFileName + " (uploaded)";
+        title = this.endpointLocator() ||
+          model.cbom?.metadata?.component?.name ||
+          model.codeOrigin.uploadedFileName;
       }
       if (model.codeOrigin.projectIdentifier != null) {
         title = model.codeOrigin.projectIdentifier;
@@ -146,6 +151,23 @@ export default {
   methods: {
     limitString,
     getDetections,
+    endpointLocator() {
+      const components = [
+        model.cbom?.metadata?.component,
+        ...(model.cbom?.components || []),
+      ].filter(Boolean);
+
+      for (const component of components) {
+        const occurrences = component.evidence?.occurrences || [];
+        const endpoint = occurrences.find(
+          (occurrence) => isEndpointOccurrence(occurrence)
+        );
+        if (endpoint) {
+          return endpoint.location;
+        }
+      }
+      return null;
+    },
   },
 };
 </script>

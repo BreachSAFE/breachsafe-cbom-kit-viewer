@@ -24,16 +24,20 @@ export function createLocalComplianceReport(cbom) {
 
     try {
         const findings = [];
+        let hasUncorrelatedAssets = false;
 
         const components = cbom.components || [];
         components.forEach(component => {
-            const bomRef = component["bom-ref"];
-            if (!bomRef) {
-                throw new Error("Missing bomRef field");
-            }
-
             const type = component.type;
             if (!type || type !== "cryptographic-asset") {
+                return;
+            }
+
+            // bom-ref is optional in CycloneDX. An unreferenced asset remains
+            // displayable. A keyed compliance finding cannot join it.
+            const bomRef = component["bom-ref"];
+            if (!bomRef) {
+                hasUncorrelatedAssets = true;
                 return;
             }
 
@@ -116,7 +120,7 @@ export function createLocalComplianceReport(cbom) {
             }
         });
 
-        const globalComplianceStatus = findings.every(finding => finding.levelId !== 1 && finding.levelId !== 2);
+        const globalComplianceStatus = !hasUncorrelatedAssets && findings.every(finding => finding.levelId !== 1 && finding.levelId !== 2);
 
         return {
             complianceServiceName: COMPLIANCE_SERVICE_NAME,
