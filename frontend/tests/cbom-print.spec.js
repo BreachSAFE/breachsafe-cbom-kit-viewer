@@ -217,3 +217,13 @@ test("restores pagination when browser printing fails", async ({ page }) => {
   );
   page.frontendErrors = [];
 });
+
+test("keeps pagination for a normal CBOM URL", async ({ page }) => {
+  await page.goto(`${baseUrl}?cbom=/api/upload/test-uid`);
+  await page.getByRole("button", { name: "sample CBOM file" }).click();
+
+  await expect(
+    page.getByText("103 cryptographic assets found.").first()
+  ).toBeVisible();
+  await expect(page.locator("tbody tr")).toHaveCount(10);
+});
