@@ -1,12 +1,14 @@
 # CBOMkit - the essentials for CBOMs
 
-> **BreachSAFE fork.** This is a private BreachSAFE fork of [PQCA/cbomkit](https://github.com/PQCA/cbomkit) (Apache-2.0, originally IBM Research), used as the embedded **QuReddy CBOM Viewer**. Changes: host-app CBOM loading (postMessage + `?cbom` URL), report-mode rendering, and BreachSAFE branding. Upstream licence in `LICENSE.txt` is unmodified.
+> **BreachSAFE fork.** This project descends from CBOMkit, originally developed by IBM Research and released under the Apache-2.0 license. It is based on [PQCA/cbomkit](https://github.com/PQCA/cbomkit) and is used here as the embedded **QuReddy CBOM Viewer**. BreachSAFE changes include host-app CBOM loading (`postMessage` + `?cbom` URL), report-mode rendering, and BreachSAFE branding. The upstream license in `LICENSE.txt` is unmodified.
 
 ## Contents
 
 1. [Release channel](#release-channel)
 2. [Quickstart](#quickstart)
-3. [Architecture](#architecture)
+3. [QuReddy integration](#qureddy-integration)
+4. [CBOM data flow](#cbom-data-flow)
+5. [Architecture](#architecture)
    1. [Frontend and CBOMkit-coeus](#frontend-and-cbomkit-coeus)
       1. [CBOMkit-coeus](#cbomkit-coeus)
    2. [API Server](#api-server)
@@ -20,8 +22,8 @@
    4. [Handling of Credentials](#handling-of-credentials)
    5. [Scanning and CBOM Generation](#scanning-and-cbom-generation)
       1. [Supported languages and libraries](#supported-languages-and-libraries)
-4. [Contribution Guidelines](#contribution-guidelines)
-5. [License](#license)
+6. [Contribution Guidelines](#contribution-guidelines)
+7. [License](#license)
 
 ## Release channel
 
@@ -31,8 +33,45 @@ semantic-version tags. Consumers must request a fresh pull during every build so
 to the newest published viewer.
 
 
-[![License](https://img.shields.io/github/license/cbomkit/cbomkit.svg)](https://opensource.org/licenses/Apache-2.0) <!--- long-description-skip-begin -->
-[![Current Release](https://img.shields.io/github/release/cbomkit/cbomkit.svg)](https://github.com/cbomkit/cbomkit/releases)
+[![License](https://img.shields.io/github/license/BreachSAFE/breachsafe-cbom-kit-viewer.svg)](LICENSE.txt) <!--- long-description-skip-begin -->
+
+## QuReddy integration
+
+The viewer is a presentation surface for CBOM artifacts produced by QuReddy. The host
+application owns scanning and evidence storage; this repository owns CBOM parsing,
+pagination, compliance presentation, and visual rendering.
+
+```mermaid
+flowchart LR
+    A[QuReddy App<br/>Gradio host] -->|CBOM route/button| B[CBOM artifact]
+    B -->|postMessage or ?cbom handoff| C[QuReddy CBOM Viewer]
+    C --> D[Parse and validate]
+    D --> E[Paginated tables and compliance views]
+
+    classDef host fill:#dbeafe,stroke:#2563eb,color:#111827
+    classDef artifact fill:#fef3c7,stroke:#d97706,color:#111827
+    classDef viewer fill:#dcfce7,stroke:#16a34a,color:#111827
+    classDef output fill:#f3e8ff,stroke:#9333ea,color:#111827
+    class A host
+    class B artifact
+    class C,D viewer
+    class E output
+```
+
+## CBOM data flow
+
+```mermaid
+sequenceDiagram
+    participant Host as QuReddy host
+    participant Viewer as CBOM viewer
+    participant Browser as Browser state
+
+    Host->>Viewer: Open viewer route with CBOM handoff
+    Viewer->>Browser: Read and validate CBOM
+    Browser-->>Viewer: Parsed component model
+    Viewer->>Viewer: Build paginated view model
+    Viewer-->>Host: Render interactive CBOM evidence
+```
 
 CBOMkit is a toolset for dealing with Cryptography Bill of Materials (CBOM). CBOMkit includes a
 - **CBOM Generation** ([CBOMkit-hyperion](https://github.com/cbomkit/sonar-cryptography), [CBOMkit-theia](https://github.com/cbomkit/cbomkit-theia)): Generate CBOMs from source code by scanning private and public git repositories to find the used cryptography.
@@ -276,8 +315,8 @@ future updates.
 If you'd like to contribute to CBOMkit, please take a look at our
 [contribution guidelines](CONTRIBUTING.md). By participating, you are expected to uphold our [code of conduct](CODE_OF_CONDUCT.md).
 
-We use [GitHub issues](https://github.com/cbomkit/cbomkit/issues) for tracking requests and bugs. For questions
-start a discussion using [GitHub Discussions](https://github.com/cbomkit/cbomkit/discussions).
+We use [GitHub issues](https://github.com/BreachSAFE/breachsafe-cbom-kit-viewer/issues) for tracking requests and bugs. For questions,
+start a discussion using [GitHub Discussions](https://github.com/BreachSAFE/breachsafe-cbom-kit-viewer/discussions).
 
 ## License
 
