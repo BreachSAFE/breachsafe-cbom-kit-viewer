@@ -1,6 +1,6 @@
-# CBOMkit - the essentials for CBOMs
+# BreachSAFE QuReddy CBOM Viewer
 
-> **BreachSAFE fork.** This project descends from CBOMkit, originally developed by IBM Research and released under the Apache-2.0 license. It is based on [PQCA/cbomkit](https://github.com/PQCA/cbomkit) and is used here as the embedded **QuReddy CBOM Viewer**. BreachSAFE changes include host-app CBOM loading (`postMessage` + `?cbom` URL), report-mode rendering, and BreachSAFE branding. The upstream license in `LICENSE.txt` is unmodified.
+> **BreachSAFE release.** This project descends from CBOMkit, originally developed by IBM Research and released under the Apache-2.0 license. It is based on [PQCA/cbomkit](https://github.com/PQCA/cbomkit) and is released and maintained by BreachSAFE as the **QuReddy CBOM Viewer**. BreachSAFE changes include CBOM upload and host handoff (`postMessage` + `?cbom` URL), report-mode rendering, and BreachSAFE branding. The upstream license in `LICENSE.txt` is unmodified.
 
 ## Contents
 
@@ -8,7 +8,9 @@
 2. [Quickstart](#quickstart)
 3. [QuReddy integration](#qureddy-integration)
 4. [CBOM data flow](#cbom-data-flow)
-5. [Architecture](#architecture)
+5. [CBOM input](#cbom-input)
+6. [Development](#development)
+7. [Upstream CBOMkit reference](#upstream-cbomkit-reference)
    1. [Frontend and CBOMkit-coeus](#frontend-and-cbomkit-coeus)
       1. [CBOMkit-coeus](#cbomkit-coeus)
    2. [API Server](#api-server)
@@ -22,29 +24,28 @@
    4. [Handling of Credentials](#handling-of-credentials)
    5. [Scanning and CBOM Generation](#scanning-and-cbom-generation)
       1. [Supported languages and libraries](#supported-languages-and-libraries)
-6. [Contribution Guidelines](#contribution-guidelines)
-7. [License](#license)
+8. [Contribution Guidelines](#contribution-guidelines)
+9. [License](#license)
 
 ## Release channel
 
-`ghcr.io/breachsafe/qureddy-cbom-viewer:latest` is the current released viewer consumed by
-QuReddy App builds. A successful GitHub release publishes `latest` together with the release's
-semantic-version tags. Consumers must request a fresh pull during every build so the tag resolves
-to the newest published viewer.
+`ghcr.io/breachsafe/qureddy-cbom-viewer:latest` is the BreachSAFE release image for the
+standalone viewer. A published GitHub release creates the corresponding semantic-version
+image tags; use an immutable digest for reproducible deployments.
 
 
 [![License](https://img.shields.io/github/license/BreachSAFE/breachsafe-cbom-kit-viewer.svg)](LICENSE.txt) <!--- long-description-skip-begin -->
 
 ## QuReddy integration
 
-The viewer is a presentation surface for CBOM artifacts produced by QuReddy. The host
-application owns scanning and evidence storage; this repository owns CBOM parsing,
+The viewer is a standalone BreachSAFE web surface for CycloneDX CBOM artifacts. A CBOM
+producer or host application supplies the artifact; this repository owns CBOM parsing,
 pagination, compliance presentation, and visual rendering.
 
 ```mermaid
 flowchart LR
-    A[QuReddy App<br/>Gradio host] -->|CBOM route/button| B[CBOM artifact]
-    B -->|postMessage or ?cbom handoff| C[QuReddy CBOM Viewer]
+    A[CBOM producer or<br/>host application] -->|file, route, or button| B[CBOM artifact]
+    B -->|postMessage or ?cbom handoff| C[BreachSAFE<br/>QuReddy CBOM Viewer]
     C --> D[Parse and validate]
     D --> E[Paginated tables and compliance views]
 
@@ -62,7 +63,7 @@ flowchart LR
 
 ```mermaid
 sequenceDiagram
-    participant Host as QuReddy host
+    participant Host as CBOM producer or host
     participant Viewer as CBOM viewer
     participant Browser as Browser state
 
@@ -73,7 +74,8 @@ sequenceDiagram
     Viewer-->>Host: Render interactive CBOM evidence
 ```
 
-CBOMkit is a toolset for dealing with Cryptography Bill of Materials (CBOM). CBOMkit includes a
+For upstream CBOMkit context, the original project is a toolset for dealing with
+Cryptography Bill of Materials (CBOM). It includes a
 - **CBOM Generation** ([CBOMkit-hyperion](https://github.com/cbomkit/sonar-cryptography), [CBOMkit-theia](https://github.com/cbomkit/cbomkit-theia)): Generate CBOMs from source code by scanning private and public git repositories to find the used cryptography.
 - **CBOM Viewer ([CBOMkit-coeus](https://github.com/cbomkit/cbomkit?tab=readme-ov-file#cbomkit-coeus))**: Visualize a generated or uploaded CBOM and access comprehensive statistics.
 - **CBOM Compliance Check**: Evaluate CBOMs created or uploaded against specified compliance policies and receive detailed compliance status reports.
@@ -86,54 +88,63 @@ CBOMkit is a toolset for dealing with Cryptography Bill of Materials (CBOM). CBO
 
 ## Quickstart
 
-Starting the CBOMkit using `docker-compose`.
-```shell
-# clone the repository 
-git clone https://github.com/cbomkit/cbomkit
-cd cbomkit
-# run the make command to start the docker compose 
-make production
+Run the published viewer image:
+
+```console
+docker run --rm -p 8000:8000 \
+  ghcr.io/breachsafe/qureddy-cbom-viewer:latest
 ```
 
-Alternatively, if you wish to use podman instead of docker, run the following:
-```shell
-# run the make command to start the docker compose using podman
-make production ENGINE=podman
+Open <http://localhost:8000>. Supply a CycloneDX CBOM by file upload or through
+the documented host handoff. Pin the image by digest for reproducible deployments.
+
+Build the viewer locally from this repository:
+
+```console
+git clone https://github.com/BreachSAFE/breachsafe-cbom-kit-viewer.git
+cd breachsafe-cbom-kit-viewer/frontend
+npm ci
+npm run build -- --mode development
+npm run serve -- --host 127.0.0.1
 ```
 
-(This requires podman-compose to have been installed via `pip3 install podman-compose`).
+The local development server listens on port `8001` by default.
 
-To run the latest development build instead of the latest release, use the `edge` images:
-```shell
-make edge
+## CBOM input
+
+The viewer accepts valid CycloneDX CBOM artifacts from any compatible producer.
+Inputs may describe cryptographic assets discovered in source code, packages,
+endpoints, runtime environments, infrastructure, or manually curated inventories.
+The viewer presents the artifact; the producing system remains responsible for
+collection, provenance, storage, and policy decisions.
+
+Supported entry points are:
+
+- file upload in the standalone viewer
+- host handoff using `postMessage`
+- `?cbom` URL handoff
+
+The viewer does not require the producer to use a particular language or framework.
+
+## Development
+
+```console
+cd frontend
+npm ci
+npm run lint
+npm run build -- --mode development
+npm run serve -- --host 127.0.0.1
 ```
 
-Next steps:
-- Enter a git url like [https://github.com/keycloak/keycloak](https://github.com/keycloak/keycloak) or a package url (PURL) like `pkg:maven/io.quarkus/quarkus-core@3.18.1` to generate a CBOM
-- View your generated CBOM by selecting your previously scanned CBOM
-- Drag and drop CBOM from the [examples](example) into the dropbox to view it
+The frontend uses Vue 2, Carbon Design components, and the existing CBOMkit
+viewer implementation. Browser regression coverage is in `frontend/tests/`.
 
-> [!NOTE]
-> By default, the service can be accessed at http://localhost:8001
+<details>
+<summary>Upstream CBOMkit implementation reference</summary>
 
-Deploy using the helm chart to a kubernetes environment. Pass the domain suffix and the cbomkit database creds via helm parameters.
-```shell
-# clone the repository 
-git clone https://github.com/cbomkit/cbomkit
-cd cbomkit
-# deploy using helm
-helm install cbomkit \
-  --set common.clusterDomain={CLUSTER_DOMAIN} \
-  --set postgresql.auth.username={POSTGRES_USER} \
-  --set postgresql.auth.password={POSTGRES_PASSWORD} \
-  --set backend.tag=$(curl -s https://api.github.com/repos/cbomkit/cbomkit/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/') \
-  --set frontend.tag=$(curl -s https://api.github.com/repos/cbomkit/cbomkit/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/') \
-  ./chart
-```
+## Upstream CBOMkit reference
 
-## Architecture
-
-The CBOMkit consists of three integral components: a web frontend, an API server, and a database.
+The upstream CBOMkit consists of three integral components: a web frontend, an API server, and a database.
 In the `ext-compliance` deployment, an additional Open Policy Agent service is used for compliance evaluation (see [External Compliance Evaluation](#external-compliance-evaluation)).
 
 ### Frontend and CBOMkit-coeus
@@ -309,6 +320,8 @@ and cryptographic libraries:
 While the CBOMkit's scanning capabilities are currently bound to the Sonar Cryptography Plugin, the modular 
 design of this plugin allows for potential expansion to support additional languages and cryptographic libraries in 
 future updates.
+
+</details>
 
 ## Contribution Guidelines
 

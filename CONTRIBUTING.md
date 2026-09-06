@@ -1,20 +1,20 @@
-# Contributing
+# Contributing to BreachSAFE QuReddy CBOM Viewer
 
-CBOMkit is a toolset for handling Cryptographic Bill of Materials (CBOM).
-This page describes how you can join the community in this goal.
+This repository contains the BreachSAFE QuReddy CBOM Viewer, based on the
+Apache-2.0 CBOMkit project originally developed by IBM Research.
 
 ## Before you start
 
-If you are new to the community? We recommend you do the following before diving into the code:
+If you are new to the community, we recommend the following before diving into the code:
 
-* Read the [Code of Conduct](https://github.com/cbomkit/cbomkit/blob/main/CODE_OF_CONDUCT.md)
-* Familiarize yourself with the community (via [GitHub](https://github.com/cbomkit/cbomkit/discussions) etc.)
+* Read the [Code of Conduct](CODE_OF_CONDUCT.md)
+* Familiarize yourself with the community through [GitHub Discussions](https://github.com/BreachSAFE/breachsafe-cbom-kit-viewer/discussions)
 
 ## Choose an issue to work on
-The Sonar Cryptography Plugin uses the following labels to help non-maintainers find issues best suited to their interest and experience level:
+Use the following labels to find issues best suited to your experience level:
 
-* [good first issue](https://github.com/cbomkit/cbomkit/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) - these issues are typically the simplest available to work on, ideal for newcomers. They should already be fully scoped, with a clear approach outlined in the descriptions.
-* [help wanted](https://github.com/cbomkit/cbomkit/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22) - these issues are generally more complex than good first issues. They typically cover work that core maintainers don't currently have capacity to implement and may require more investigation/discussion. These are a great option for experienced contributors looking for something a bit more challenging.
+* [good first issue](https://github.com/BreachSAFE/breachsafe-cbom-kit-viewer/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) - scoped work suitable for newcomers.
+* [help wanted](https://github.com/BreachSAFE/breachsafe-cbom-kit-viewer/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22) - work where contributors can help move an issue forward.
 
 ## Code Style
 
@@ -30,7 +30,7 @@ Spotless Maven Documentation: https://github.com/diffplug/spotless/blob/main/plu
 
 Check for coding style
 ```shell
-mvn checkstyle::check
+mvn checkstyle:check
 ```
 
 ## Build

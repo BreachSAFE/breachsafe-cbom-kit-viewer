@@ -70,8 +70,8 @@ The spotless plugin binds `apply` (not `check`) to the `validate` phase, and che
 
 - A successful release must publish `ghcr.io/breachsafe/qureddy-cbom-viewer:latest` and the
   matching semantic-version tags.
-- QuReddy App consumes the first-party viewer through `:latest` and rebuilds with pull enabled.
-- Do not replace that app-to-viewer contract with a digest pin or copied asset hash allowlist.
+- BreachSAFE integrations consume the first-party viewer through `:latest` and rebuild with pull enabled.
+- Do not replace that host-to-viewer contract with a digest pin or copied asset hash allowlist.
 - Keep immutable digests in build attestations and registry metadata for audit evidence. They are
   observations of a build, not the app's dependency selector.
 - A broken upstream viewer is handled by fixing or reverting the viewer release and rebuilding the
