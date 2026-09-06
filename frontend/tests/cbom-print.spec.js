@@ -218,12 +218,47 @@ test("restores pagination when browser printing fails", async ({ page }) => {
   page.frontendErrors = [];
 });
 
+// The handoff URL has to resolve. An unserved path falls through nginx's
+// try_files to index.html, main.js parses that HTML as JSON, and the console
+// trap in afterEach records the SyntaxError, so the test fails on its own
+// request rather than on the behaviour it asserts. Serving the fixture also
+// makes these tests exercise the ?cbom= fetch they are named for: loading the
+// data with the sample button instead would pass even if the fetch were gone.
+const HANDOFF_URL = "/api/upload/test-uid";
+
+// Matched on pathname, not a glob: the page URL carries the handoff path in its
+// query string, so `**/api/upload/test-uid` also matches the document request
+// and Playwright answers the navigation itself with raw JSON.
+async function serveCbomAt(page, path) {
+  await page.route(
+    (url) => url.pathname === path,
+    (route) =>
+      route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify(sampleCbom),
+      })
+  );
+}
+
 test("keeps pagination for a normal CBOM URL", async ({ page }) => {
-  await page.goto(`${baseUrl}?cbom=/api/upload/test-uid`);
-  await page.getByRole("button", { name: "sample CBOM file" }).click();
+  await serveCbomAt(page, HANDOFF_URL);
+  await page.goto(`${baseUrl}?cbom=${HANDOFF_URL}`);
 
   await expect(
     page.getByText("103 cryptographic assets found.").first()
   ).toBeVisible();
   await expect(page.locator("tbody tr")).toHaveCount(10);
+});
+
+// The other arm of the same condition. Without this, a typo such as
+// `=== 'reports'` leaves the test above green while every report render is
+// silently paginated.
+test("renders every asset when mode=report is asked for", async ({ page }) => {
+  await serveCbomAt(page, HANDOFF_URL);
+  await page.goto(`${baseUrl}?cbom=${HANDOFF_URL}&mode=report`);
+
+  await expect(
+    page.getByText("103 cryptographic assets found.").first()
+  ).toBeVisible();
+  await expect(page.locator("tbody tr")).toHaveCount(103);
 });
