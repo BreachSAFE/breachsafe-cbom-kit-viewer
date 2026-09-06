@@ -343,12 +343,13 @@ export function getDetectionsFromCbom(cbom) {
             component.evidence.occurrences.forEach(function (
               singleContext
             ) {
-              let detectionWithSingleContext = JSON.parse(
-                JSON.stringify(component)
-              );
-              detectionWithSingleContext.evidence.occurrences = [
-                singleContext,
-              ];
+              const detectionWithSingleContext = {
+                ...component,
+                evidence: {
+                  ...component.evidence,
+                  occurrences: [singleContext],
+                },
+              };
               detections.push(detectionWithSingleContext);
             });
           } else {
