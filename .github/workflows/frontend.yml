@@ -132,7 +132,7 @@ jobs:
 
       - name: Test Docker Build
         if: github.event_name == 'pull_request'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: "./frontend"
           file: "./frontend/Dockerfile.viewer"
@@ -145,7 +145,7 @@ jobs:
       - name: Build and push by digest
         id: build
         if: github.event_name != 'pull_request'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: "./frontend"
           file: "./frontend/Dockerfile.viewer"
